@@ -13,70 +13,137 @@
 #include <tuple>
 using namespace std;
 
-//creates a square matrix of dimensions Size X Size, with the values being the column number
-void createKnownSquareMatrix(int Size, int* squareMatrix, bool displayMatrices)
+//Reads in the image dimensions from the image preprocessing
+void getImageDimensions(string fname, int* dimensions)
 {
-	for(int i = 0; i<Size; i++){
+        fstream file;
+        file.open(fname,ios::in);
 
-		for(int j = 0; j<Size; j++){
-			squareMatrix[i*Size+j] = j + 1;
-			if(displayMatrices){
-				cout<<squareMatrix[i*Size+j]<<"\t ";
-			}
-		}
-		if(displayMatrices){
-			cout<<"\n";
-		}
-	}
+        if (file.is_open())
+        {
+                string line;
+                bool test1 = true;
+                bool test2 = true;
+                while(getline(file, line))
+                {
+                        if(test1)
+                        {
+                                dimensions[0] = stoi(line);
+                                test1 = false;
+                        }
+                        else if(test2)
+                        {
+                                dimensions[1] = stoi(line);
+                                test2 = false;
+                        }
+                        else
+                        {
+                                break;
+                        }
+                }
+
+                file.close();
+        }
 }
 
 int main(void)
 {
-	clock_t start, end;  //Timers
+	cout << "Median filter processing started...\n";
 
-	//New code for prac 2.2
-	bool displayMatrices = true;
-	int rows = 4;
-	int cols = 4;
+        //Initilising variables
+        bool displayMatrices = false;
+        int dimensions[2];
+	string fname = "../imageData.txt";
+
+        getImageDimensions(fname, dimensions);
+
+        int cols = dimensions[0];
+        int rows = dimensions[1];
 	int items = rows*cols;
-	int imageMatrix[items];
-	createKnownSquareMatrix(rows, imageMatrix, displayMatrices);
-	cout<<"Number of elements in matrix 1: "<<items<<"\n";
-	cout<<"Dimensions of matrix 1: "<<cols<<"x"<<rows<<"\n";
-	cout<<"Matrix 1 pointer: "<<imageMatrix<<"\n";
+	int imageMatrixR[items];
+	int imageMatrixG[items];
+	int imageMatrixB[items];
 
-	/* OpenCL structures you need to program */
-	//cl_device_id device; step 1 and 2
-	//cl_context context;  step 3
-	//cl_program program;  steps 4,5 and 6
-	//cl_kernel kernel; step 7
-	//cl_command_queue queue; step 8
+	cout << "Variables initliased...\n";
 
-	//------------------------------------------------------------------------
+	//Getting data from preprocessed image
+	fstream file;
+        file.open(fname,ios::in);
 
+        if (file.is_open())
+        {
+                int pos = -2;
+                string line;
+                bool test1 = true;
+                bool test2 = true;
 
-	//Initialize Buffers, memory space the allows for communication between the host and the target device
-	//TODO: initialize matrixA_buffer, matrixB_buffer and output_buffer
-	cl_mem imageMatrix_buffer, outputMatrix_buffer;
+                while(getline(file, line))
+                {
+                        if(test1)
+                        {
+                                test1 = false;
+                        }
+                        else if(test2)
+                        {
+                                test2 = false;
+                        }
+                        else
+                        {
+                                bool testR = true;
+                                bool testG = true;
+                                int n = line.length();
+                                string s = "";
 
-	//step 1 Get the platform you want to use
-	//cl_int clGetPlatformIDs(cl_uint num_entries,
-	//				cl_platform_id *platforms,
-	//				cl_uint *num_platforms)
+                                for(int i = 0; i < n; i++)
+                                {
+                                        if(line[i] != ' ')
+                                        {
+                                                s += line[i];
+                                        }
+                                        else if(testR)
+                                        {
+                                                imageMatrixR[pos] = stoi(s);
+                                                s = "";
+                                                testR = false;
+                                        }
+                                        else if(testG)
+                                        {
+                                                imageMatrixG[pos] = stoi(s);
+                                                s = "";
+                                                testG = false;
+                                        }
+                                }
+
+                                imageMatrixB[pos] = stoi(s);
+                        }
+                        pos += 1;
+                }
+
+                file.close();
+        }
+
+	cout << "Image data read in...\n\n";
+
+	//Displaying matrice info
+	cout << "Number of elements in matrix: " << items << "\n";
+	cout << "Dimensions of matrix: " << cols << "x" << rows << "\n\n";
+
+	//Initializing buffers
+	cl_mem imageMatrixR_buffer, imageMatrixG_buffer, imageMatrixB_buffer, outputMatrix_buffer;
+	cout << "Buffers initialised...\n\n";
 
     	//------------------------------------------------------------------------
+	//Getting platform info
+	cl_uint platformCount;
+	cl_platform_id *platforms;
+	clGetPlatformIDs(5, NULL, &platformCount);
 
-	cl_uint platformCount; //keeps track of the number of platforms you have installed on your device
-	cl_platform_id *platforms; // get platform count
-	clGetPlatformIDs(5, NULL, &platformCount); //sets platformCount to the number of platforms
-
-	// get all platforms
+	//Getting all avaliable platforms
 	platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
-	clGetPlatformIDs(platformCount, platforms, NULL); //saves a list of platforms in the platforms variable
+	clGetPlatformIDs(platformCount, platforms, NULL);
+	cl_platform_id platform = platforms[0];
 
-	cl_platform_id platform = platforms[0]; //Select the platform you would like to use in this program (change index to do this). If you would like to see all available platforms run platform.cpp.
-
-	//Outputs the information of the chosen platform
+	//Outputting platform info
 	char* Info = (char*)malloc(0x1000*sizeof(char));
 	clGetPlatformInfo(platform, CL_PLATFORM_NAME      , 0x1000, Info, 0);
 	printf("Name      : %s\n", Info);
@@ -87,166 +154,122 @@ int main(void)
 	clGetPlatformInfo(platform, CL_PLATFORM_PROFILE   , 0x1000, Info, 0);
 	printf("Profile   : %s\n", Info);
 
+	cout << "\nStage 1 complete...\n\n";
+
 	//------------------------------------------------------------------------
-
-	//step 2 get device ID must first get platform
-	//cl_int clGetDeviceIDs(cl_platform_id platform,
-	//			cl_device_type device_type,
-	//			cl_uint num_entries,
-	//			cl_device_id *devices,
-	//			cl_uint *num_devices)
-
-	cl_device_id device; //this is your deviceID
+	//Getting device id
+	cl_device_id device;
 	cl_int err;
 
-	/* Access a device */
-	//The if statement checks to see if the chosen platform uses a GPU, if not it setups the device using the CPU
+	//Acessing the device
 	err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 1, &device, NULL);
 
 	if(err == CL_DEVICE_NOT_FOUND) {
 		err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 1, &device, NULL);
 	}
 
-	printf("Device ID = %i\n",err);
+	printf("Device ID = %i\n\n",err);
+
+	cout << "Stage 2 complete...\n";
 
 	//------------------------------------------------------------------------
-
-	//Step 3 creates a context that allows devices to send and receive kernels and transfer data
-	//cl_context clCreateContext(cl_context_properties *properties,
-	//				cl_uint num_devices,
-	//				const cl_device_id *devices,
-	//				void *pfn_notify(const char *errinfo, const void *private_info, size_t cb, void *user_data),
-	//				void *user_data,cl_int *errcode_ret)
-
-	cl_context context; //This is your contextID, the line below must just run
+	//Creating context that allows device to send/recieve/transfer data
+	cl_context context;
 	context = clCreateContext(NULL, 1, &device, NULL, NULL, NULL);
 
-	//------------------------------------------------------------------------
+	cout << "Stage 3 complete...\n";
 
-	//Step 4 get details about the kernel.cl file in order to create it (read the kernel.cl file and place it in a buffer)
-	//read file in
+	//------------------------------------------------------------------------
+	//Reading in file
 	FILE *program_handle;
 	program_handle = fopen("OpenCL/Kernel.cl", "r");
 
-	//get program size
-	size_t program_size;//, log_size;
+	//Getting the program size
+	size_t program_size;
 	fseek(program_handle, 0, SEEK_END);
 	program_size = ftell(program_handle);
 	rewind(program_handle);
 
-	//sort buffer out
-	char *program_buffer;//, *program_log;
+	//Sorting the buffer out
+	char *program_buffer;
 	program_buffer = (char*)malloc(program_size + 1);
 	program_buffer[program_size] = '\0';
 	fread(program_buffer, sizeof(char), program_size, program_handle);
 	fclose(program_handle);
 
-	//------------------------------------------------------------------------
-
-	//Step 5 create program from source because the kernel is in a separate file 'kernel.cl', therefore the compiler must run twice once on main and once on kernel
-	//cl_program clCreateProgramWithSource (cl_context context,
-	//						cl_uint count,
-	//						const char **strings,
-	//						const size_t *lengths,
-	//						cl_int *errcode_ret)
-
-	cl_program program = clCreateProgramWithSource(context, 1, (const char**)&program_buffer, &program_size, NULL); //this compiles the kernels code
+	cout << "Stage 4 complete...\n";
 
 	//------------------------------------------------------------------------
+	//Compling kernel code
+	cl_program program = clCreateProgramWithSource(context, 1, (const char**)&program_buffer, &program_size, NULL);
 
-	//Step 6 build the program, this compiles the source code from above for the devices that the code has to run on (ie GPU or CPU)
-	//cl_int clBuildProgram(cl_program program,
-	//		cl_uint num_devices,
-	//		const cl_device_id* device_list,
-	//		const char* options,
-	//		void (CL_CALLBACK* pfn_notify)(cl_program program, void* user_data),
-	//		void* user_data);
+        cout << "Stage 5 complete...\n\n";
+
+	//------------------------------------------------------------------------
+	//Building the program from the above code
 
 	cl_int err3 = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	printf("program ID = %i\n", err3);
+	printf("program ID = %i\n\n", err3);
+
+        cout << "Stage 6 complete...\n";
 
 	//------------------------------------------------------------------------
-
-	//Step 7 creates the kernel, this creates a kernel from one of the functions in the cl_program you just built
-	//cl_kernel clCreateKernel(cl_program program,
-	//			const char* kernel_name,
-	//			cl_int* errcode_ret);
-
-	//TODO: select the kernel you are running
+	//Creating the kernel
 	cl_kernel kernel = clCreateKernel(program, "edgeDetector", &err);
 
-	//------------------------------------------------------------------------
+        cout << "Stage 7 complete...\n";
 
-	//Step 8 create command queue to the target device. This is the queue that the kernels get dispatched too, to get the the desired device.
-	//cl_command_queue clCreateCommandQueue(cl_context context,
-	//						cl_device_id device,
-	//						cl_command_queue_properties properties,
-	//						cl_int *errcode_ret)
-
+	//-----------------------------------------------------------------------
+	//Creating command queue to target device
 	cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, 0, NULL);
 
+	cout << "Stage 8 complete...\n";
+
 	//------------------------------------------------------------------------
+	//Creating data buffers for memory management
+	size_t global_size = items; 			//Total number of work items/pixels in image
+	size_t local_size = rows; 			//Size of each work group/rows in image
+	cl_int num_groups = global_size/local_size; 	//Number of work groups needed
 
-	//Step 9 create data buffers for memory management between the host and the target device
-	//TODO: set global_size, local_size and num_groups, in order to control the number of work item in each work group
-	size_t global_size = items; //total number of work items
-	size_t local_size = rows; //Size of each work group
-	cl_int num_groups = global_size/local_size; //number of work groups needed
+	//Initialising output matrix
+        int outputMatrix[global_size];
 
-	//already got matrixA and matrixB
-	//TODO: initialize the output array
-        int outputMatrix[global_size]; //output array
-
-	//Buffer (memory block) that both the host and target device can access
-	//cl_mem clCreateBuffer(cl_context context,
-	//			cl_mem_flags flags,
-	//			size_t size,
-	//			void* host_ptr,
-	//			cl_int* errcode_ret);
-
-	//TODO: create matrixA_buffer, matrixB_buffer and output_buffer, with clCreateBuffer()
-	imageMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrix, &err);
+	//Creating buffers
+	imageMatrixR_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixR, &err);
+        imageMatrixG_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixG, &err);
+        imageMatrixB_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixB, &err);
 	outputMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), outputMatrix, &err);
 
-	//------------------------------------------------------------------------
-
-	//Step 10 create the arguments for the kernel (link these to the buffers set above, using the pointers for the respective buffers)
-	// cl_int clSetKernelArg (cl_kernel kernel,
-	//				cl_uint arg_index,
-	//				size_t arg_size,
-	//				const void *arg_value)
-
-	//TODO: create the arguments for the kernel. Note you can create a local buffer only on the GPU as follows: clSetKernelArg(kernel, argNum, size, NULL);
-	clSetKernelArg(kernel, 0, sizeof(cl_mem), &imageMatrix_buffer);
-	clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputMatrix_buffer);
+        cout << "Stage 9 complete...\n";
 
 	//------------------------------------------------------------------------
+	//Creating kernel arguments
+	clSetKernelArg(kernel, 0, sizeof(cl_mem), &imageMatrixR_buffer);
+	clSetKernelArg(kernel, 1, sizeof(cl_mem), &imageMatrixG_buffer);
+	clSetKernelArg(kernel, 2, sizeof(cl_mem), &imageMatrixB_buffer);
+	clSetKernelArg(kernel, 3, sizeof(cl_mem), &outputMatrix_buffer);
 
-	//Step 11 enqueue kernel, deploys the kernels and determines the number of work-items that should be generated to execute the kernel (global_size) and the number of work-items in each work-group (local_size).
+        cout << "Stage 10 complete...\n";
 
-	// cl_int clEnqueueNDRangeKernel (cl_command_queue command_queue,
-	//					cl_kernel kernel,
-	//					cl_uint work_dim,
-	//					const size_t *global_work_offset,
-	//					const size_t *global_work_size,
-	//					const size_t *local_work_size,
-	//					cl_uint num_events_in_wait_list,
-	//					const cl_event *event_wait_list,
-	//					cl_event *event)
+	//------------------------------------------------------------------------
+	//Enqueueing the kernel and deploying it
 
 	cl_int err4 = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, NULL);
-	printf("\nKernel check: %i \n",err4);
+	printf("\nKernel check: %i \n\n",err4);
+
+        cout << "Stage 11 complete...\n";
 
 	//------------------------------------------------------------------------
-
-	//Step 12 Allows the host to read from the buffer object
+	//Allowing the host to read from the buffer object
 	err = clEnqueueReadBuffer(queue, outputMatrix_buffer, CL_TRUE, 0, sizeof(outputMatrix), outputMatrix, 0, NULL, NULL);
 
-	//This command stops the program here until everything in the queue has been run
+	//Stopping the program here until everything in the queue has been run
 	clFinish(queue);
 
-	//Step 13 Check that the host was able to retrieve the output data from the output buffer
+	cout << "Stage 12 complete...\n";
 
+        //------------------------------------------------------------------------
+	//Checking that the host was able to retrieve the output data from the output buffer
 	if(displayMatrices){
 		printf("\nOutput in the output_buffer \n");
 		for(int j=0; j<items; j++) {
@@ -257,15 +280,20 @@ int main(void)
 		}
 	}
 
-	//------------------------------------------------------------------------
+	cout << "Stage 13 complete...\n";
 
-	//Step 14 Deallocate resources
+	//------------------------------------------------------------------------
+	//Deallocating resources
 	clReleaseKernel(kernel);
 	clReleaseMemObject(outputMatrix_buffer);
-	clReleaseMemObject(imageMatrix_buffer);
+	clReleaseMemObject(imageMatrixR_buffer);
+	clReleaseMemObject(imageMatrixG_buffer);
+	clReleaseMemObject(imageMatrixB_buffer);
 	clReleaseCommandQueue(queue);
 	clReleaseProgram(program);
 	clReleaseContext(context);
+
+	cout << "Stage 14 complete...\n";
 
 	return 0;
 }

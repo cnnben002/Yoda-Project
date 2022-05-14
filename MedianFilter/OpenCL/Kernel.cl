@@ -2,7 +2,7 @@
 //Group 1
 //12/05/2022
 
-__kernel void medianFilter(__global string* imageMatrix, __global int* outputMatrix)
+__kernel void medianFilter(__global string* imageMatrixR, __global string* imageMatrixG, __global string* imageMatrixB, __global int* outputMatrix)
 {
 	//Work item and work groups numbers
 	int workItemNum = get_global_id(0);     //Work item ID
