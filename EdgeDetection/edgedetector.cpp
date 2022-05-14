@@ -51,7 +51,7 @@ int main(void)
 	cout << "Median filter processing started...\n";
 
         //Initilising variables
-        bool displayMatrices = false;
+        bool displayMatrix = false;
         int dimensions[2];
 	string fname = "../imageData.txt";
 
@@ -270,16 +270,13 @@ int main(void)
 
         //------------------------------------------------------------------------
 	//Checking that the host was able to retrieve the output data from the output buffer
-	if(displayMatrices){
-		printf("\nOutput in the output_buffer \n");
-		for(int j=0; j<items; j++) {
-			printf("%i \t " ,outputMatrix[j]);
-			if(j%rows == (rows-1)){
-				printf("\n");
-			}
+	if(displayMatrix)
+	{
+		for(int i =0; i < items; i++)
+		{
+			cout << imageMatrixR[i] << " ";
 		}
 	}
-
 	cout << "Stage 13 complete...\n";
 
 	//------------------------------------------------------------------------
@@ -294,6 +291,22 @@ int main(void)
 	clReleaseContext(context);
 
 	cout << "Stage 14 complete...\n";
+
+	//------------------------------------------------------------------------
+        //Writing the output array to a text file for post median filter processing
+	ofstream outFile("../edgeImageData.txt");
+
+	outFile << rows << "\n";
+	outFile << cols << "\n";
+
+	for(int i = 0; i < items; i ++)
+	{
+  		outFile << outputMatrix[i] << "\n";
+	}
+
+  	outFile.close();
+
+	cout << "Stage 15 complete...\n";
 
 	return 0;
 }

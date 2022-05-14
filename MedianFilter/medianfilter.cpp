@@ -232,13 +232,13 @@ int main(void)
 	cl_int num_groups = global_size/local_size; 	//Number of work groups needed
 
 	//Initialising output matrix
-        int outputMatrix[global_size];
+        char outputMatrix[global_size];
 
 	//Creating buffers
 	imageMatrixR_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixR, &err);
         imageMatrixG_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixG, &err);
         imageMatrixB_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixB, &err);
-	outputMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), outputMatrix, &err);
+	outputMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(char), outputMatrix, &err);
 
         cout << "Stage 9 complete...\n";
 
@@ -294,7 +294,10 @@ int main(void)
 
 	//------------------------------------------------------------------------
         //Writing the output array to a text file for post median filter processing
-	ofstream outFile("../medianImageData.txt");
+	ofstream outFile("../edgeImageData.txt");
+
+	outFile << rows << "\n";
+	outFile << cols << "\n";
 
 	for(int i = 0; i < items; i ++)
 	{

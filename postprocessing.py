@@ -9,7 +9,8 @@ from numpy import asarray
 import numpy as np
 
 #Opening the txt file
-fname = input("Please type in file to be converted:\n")
+fname = input("Please type .txt file to be converted:\n")
+print(fname)
 f = open(fname, "r")
 
 #Getting file dimensions
