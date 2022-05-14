@@ -21,6 +21,7 @@ print("Height: " + str(row))
 #Getting array of data
 data = asarray(image)
 
+print(data.shape)
 print("Image conversion done...")
 
 #Saving the array to a txt file
