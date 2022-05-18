@@ -11,8 +11,12 @@ __kernel void medianFilter(__global int* imageMatrixR, __global int* imageMatrix
     int workItemNum = get_global_id(0);     //Work item ID
     int workGroupNum = get_group_id(0);     //Work group ID
 
+    int items = get_global_size(0);
+    int rows = get_local_size(0);               //Number of rows
+    int cols = items/rows;
+     
     int lenMat = get_global_size(0);
-    int w = 355;
+    int w = cols;
     int h = w;
     int posx = get_global_id(1);
     int posy = get_global_id(0);
