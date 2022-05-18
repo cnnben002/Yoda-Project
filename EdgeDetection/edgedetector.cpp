@@ -55,7 +55,7 @@ int main(void)
         //Initilising variables
         bool displayMatrix = false;
         int dimensions[2];
-	string fname = "../medianImageData.txt";
+	string fname = "../imageData.txt";
 
         getImageDimensions(fname, dimensions);
 
@@ -255,10 +255,13 @@ int main(void)
 
 	//------------------------------------------------------------------------
 	//Enqueueing the kernel and deploying it
+	clock_t begink = clock();
 
 	cl_int err4 = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, NULL);
-	printf("\nKernel check: %i \n\n",err4);
 
+	clock_t endk = clock();
+
+	printf("\nKernel check: %i \n\n",err4);
         cout << "Stage 11 complete...\n";
 
 	//------------------------------------------------------------------------
@@ -314,8 +317,11 @@ int main(void)
         //Calculating program run time and ending the program
         clock_t end = clock();
         double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
+	double kernelRuntime = (double)(endk-begink)*1000/CLOCKS_PER_SEC;
 
-        cout << "Runtime: " << runtime << " ms\n";
+        cout << "Program runtime: " << runtime << " ms\n";
+	cout << "Kernel runtime: " << kernelRuntime << " ms\n";
+	cout << "Overhead runtime: " << runtime-kernelRuntime << " ms\n";
 
         return 0;
 }

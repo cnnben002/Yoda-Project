@@ -41,6 +41,8 @@ void getImageDimensions(string fname, int* dimensions)
 
 int main(void)
 {
+	clock_t begin = clock();
+
 	int sobx[3][3] = { {-1, 0, 1},
                            {-2, 0, 2},
                            {-1, 0, 1} };
@@ -128,7 +130,6 @@ int main(void)
 	//greyscale matrix and relative position
 	int Grey[items];
 	int pos;
-	clock_t begin = clock();
 
 	//converting to greyscale
 	for (int i = 0; i < items; i++){
@@ -136,6 +137,8 @@ int main(void)
         }
 
 	cout << "Image data converted to greyscale...\n\n";
+
+	clock_t beginf = clock();
 
 	//Edge detection
 	int sumx = 0, sumy = 0, angle = 0;
@@ -173,6 +176,8 @@ int main(void)
 			}
 		}
 	}
+
+	clock_t endf = clock();
 	cout << "edge detection complete...\n\n";
 
 	//writing to output textfile
@@ -187,9 +192,12 @@ int main(void)
   	outFile.close();
 	clock_t end = clock();
         double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
+        double filterRuntime = (double)(endf-beginf)*1000/CLOCKS_PER_SEC;
 
 	//runtime
-        cout << "Runtime: " << runtime << " ms\n";
+        cout << "Program runtime: " << runtime << " ms\n";
+        cout << "Filter runtime: " << filterRuntime << " ms\n";
+        cout << "Overhead runtime: " << runtime-filterRuntime << " ms\n";
 
 	return 0;
 }
