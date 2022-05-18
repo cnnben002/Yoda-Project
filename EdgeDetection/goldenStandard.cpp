@@ -54,13 +54,14 @@ int main(void)
         //Initilising variables
         bool displayMatrix = false;
         int dimensions[2];
-	string fname = "imageData.txt";
-
+	string fname = "../imageData.txt";
+	//retrieving image dimensions
         getImageDimensions(fname, dimensions);
-
+	//indeces
         int cols = dimensions[0];
         int rows = dimensions[1];
 	int items = rows*cols;
+	//local matrices for individual colour values
 	int imageMatrixR[items];
 	int imageMatrixG[items];
 	int imageMatrixB[items];
@@ -70,7 +71,6 @@ int main(void)
 	//Getting data from preprocessed image
 	fstream file;
         file.open(fname,ios::in);
-
         if (file.is_open())
         {
                 int pos = -2;
@@ -124,13 +124,20 @@ int main(void)
         }
 
 	cout << "Image data read in...\n\n";
+
+	//greyscale matrix and relative position
 	int Grey[items];
 	int pos;
-
+	clock_t begin = clock();
+	
+	//converting to greyscale
 	for (int i = 0; i < items; i++){
                 Grey[i] = round(0.299*imageMatrixR[i]+0.587*imageMatrixG[i]+0.114*imageMatrixB[i]);
         }
+
 	cout << "Image data converted to greyscale...\n\n";
+	
+	//Edge detection
 	int sumx = 0, sumy = 0, angle = 0;
 	int p;
        	int k;
@@ -140,8 +147,12 @@ int main(void)
 	for (int r = 0; r < rows; r++){
 		//col iteration
 		for (int c = 0; c < cols; c++){
-        		pos = r*cols+c;
+        		
+			//calculating possition in linear array
+			pos = r*cols+c;
+			//ignoring outer rows and columbs
 			if ((r != 0)&&(r != (rows-1))&&(c != 0)&&(c != (cols-1))){
+				//finding surounding values
 				sumx = 0;
 				sumy = 0;
 				p = -1;
@@ -155,15 +166,18 @@ int main(void)
 					p = p+1;
 				}
 				out[pos] = min(255,max(0, (int)pow((sumx*sumx+sumy*sumy),0.5)));
-			}else{
+			}
+			//if on outer edge set output value to original greyscale
+			else{
+
 				out[pos] = Grey[pos];
 			}
 		}
 	}
 	cout << "edge detection complete...\n\n";
-
-	ofstream outFile("../edgeImageDataGS.txt");
-
+	
+	//writing to output textfile
+	ofstream outFile("GoldenStandard_EdgeImageData.txt");
 	outFile << rows << "\n";
 	outFile << cols << "\n";
 
@@ -171,10 +185,12 @@ int main(void)
 	{
   		outFile << out[i] << "\n";
 	}
-
   	outFile.close();
-
+	clock_t end = clock();
+        double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
+	
+	//runtime
+        cout << "Runtime: " << runtime << " ms\n";
+	
 	return 0;
-
-
 }
