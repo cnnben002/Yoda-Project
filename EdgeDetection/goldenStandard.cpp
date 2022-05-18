@@ -57,6 +57,7 @@ int main(void)
         bool displayMatrix = false;
         int dimensions[2];
 	string fname = "../imageData.txt";
+
 	//retrieving image dimensions
         getImageDimensions(fname, dimensions);
 	//indeces
