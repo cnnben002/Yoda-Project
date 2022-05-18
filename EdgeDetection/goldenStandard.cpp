@@ -129,14 +129,14 @@ int main(void)
 	int Grey[items];
 	int pos;
 	clock_t begin = clock();
-	
+
 	//converting to greyscale
 	for (int i = 0; i < items; i++){
                 Grey[i] = round(0.299*imageMatrixR[i]+0.587*imageMatrixG[i]+0.114*imageMatrixB[i]);
         }
 
 	cout << "Image data converted to greyscale...\n\n";
-	
+
 	//Edge detection
 	int sumx = 0, sumy = 0, angle = 0;
 	int p;
@@ -147,7 +147,6 @@ int main(void)
 	for (int r = 0; r < rows; r++){
 		//col iteration
 		for (int c = 0; c < cols; c++){
-        		
 			//calculating possition in linear array
 			pos = r*cols+c;
 			//ignoring outer rows and columbs
@@ -175,9 +174,9 @@ int main(void)
 		}
 	}
 	cout << "edge detection complete...\n\n";
-	
+
 	//writing to output textfile
-	ofstream outFile("GoldenStandard_EdgeImageData.txt");
+	ofstream outFile("../gsEdgeImageData.txt");
 	outFile << rows << "\n";
 	outFile << cols << "\n";
 
@@ -188,9 +187,9 @@ int main(void)
   	outFile.close();
 	clock_t end = clock();
         double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
-	
+
 	//runtime
         cout << "Runtime: " << runtime << " ms\n";
-	
+
 	return 0;
 }
