@@ -41,7 +41,7 @@ void getImageDimensions(string fname, int* dimensions)
 
 int main(void)
 {
-	clock_t beginf = clock();
+	clock_t begin = clock();
 	
 	int sobx[3][3] = { {-1, 0, 1},
                            {-2, 0, 2},
