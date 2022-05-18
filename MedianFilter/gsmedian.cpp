@@ -7,176 +7,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-//Reads in the image dimensions from the image preprocessing
-/*void getImageDimensions(string fname, int* dimensions)
-{
-        fstream file;
-        file.open(fname,ios::in);
-
-        if (file.is_open())
-        {
-                string line;
-                bool test1 = true;
-                bool test2 = true;
-                while(getline(file, line))
-                {
-                        if(test1)
-                        {
-                                dimensions[0] = stoi(line);
-                                test1 = false;
-                        }
-                        else if(test2)
-                        {
-                                dimensions[1] = stoi(line);
-                                test2 = false;
-                        }
-                        else
-                        {
-                                break;
-                        }
-                }
-
-                file.close();
-        }
-}
-
-int main(void)
-{
-//	int sobx[3][3] = { {-1, 0, 1},
-  //                         {-2, 0, 2},
-   //                        {-1, 0, 1} };
-
-//	int soby[3][3] = { {-1,-2,-1},
-  //                         { 0, 0, 0},
-   //                        { 1, 2, 1} };
-
-   cout << "Golden standard edge detection...\n";
-
-        //Initilising variables
-   bool displayMatrix = false;
-   int dimensions[2];
-   string fname = "imageData.txt";
-
-   getImageDimensions(fname, dimensions);
-   int cols = dimensions[0];
-   int rows = dimensions[1];
-   int items = rows*cols;
-   int imageMatrixR[items];
-   int imageMatrixG[items];
-   int imageMatrixB[items];
-
-   cout << "Variables initliased...\n";
-
-	//Getting data from preprocessed image
-   fstream file;
-   file.open(fname,ios::in);
-
-   if (file.is_open())
-        {
-        int pos = -2;
-        string line;
-        bool test1 = true;
-        bool test2 = true;
-
-        while(getline(file, line))
-	    {
-            if(test1)
-                {
-                    test1 = false;
-                }
-	    else if(test2)
-                 {
-                    test2 = false;
-                 }
-            else
-                 {
-                 bool testR = true;
-                 bool testG = true;
-                 int n = line.length();
-                 string s = "";
-
-            for(int i = 0; i < n; i++)
-                 {
-                 if(line[i] != ' ')
-                     {
-                     s += line[i];                  
-		     }
-                 else if(testR)
-                     {
-                     imageMatrixR[pos] = stoi(s);
-		     s = "";
-                     testR = false;
-                     }
-		 else if(testG)
-                     {
-   	             imageMatrixG[pos] = stoi(s);
-	             s = "";
-	    	     testG = false;
-		     }
-		 }
-
-	    imageMatrixB[pos] = stoi(s);
-		 }
-	    pos += 1;
-            }
-    	file.close();
-        }
-
-	cout << "Image data read in...\n\n";
-	
-	int pos;
-
-
-	
-	
-	int out[items][3];
-
-	//row iteration
-	for (int r = 0; r < rows; r++){
-		//col iteration
-		for (int c = 0; c < cols; c++){
-        		pos = r*cols+c;
-			if ((r != 0)&&(r != (rows-1))&&(c != 0)&&(c != (cols-1))){
-
-				int windowR[9]= {imageMatrixR[pos-cols-1],imageMatrixR[pos-cols],imageMatrixR[pos-cols+1],imageMatrixR[pos-1],imageMatrixR[pos],imageMatrixR[pos+1],imageMatrixR[pos+cols-1],imageMatrixR[pos+cols],imageMatrixR[pos+cols+1]};
-                                int windowB[9]= {imageMatrixB[pos-cols-1],imageMatrixB[pos-cols],imageMatrixB[pos-cols+1],imageMatrixB[pos-1],imageMatrixB[pos],imageMatrixB[pos+1],imageMatrixB[pos+cols-1],imageMatrixB[pos+cols],imageMatrixB[pos+cols+1]};
-                                int windowG[9]= {imageMatrixG[pos-cols-1],imageMatrixG[pos-cols],imageMatrixG[pos-cols+1],imageMatrixG[pos-1],imageMatrixG[pos],imageMatrixG[pos+1],imageMatrixG[pos+cols-1],imageMatrixG[pos+cols],imageMatrixG[pos+cols+1]};
-                                sort(windowR);
-                                sort(windowB);
-                                sort(windowG);
-                                out[pos][0] = windowR[4]
-                                out[pos][1] = windowG[4]
-                                out[pos][2] = windowB[4]
-            
-                        }
-				
-			}
-		else{
-			out[pos][0] = imageMatrixR[pos];
-                        out[pos][1] = imageMatrixG[pos];
-                        out[pos][2] = imageMatrixB[pos];
-			}
-		}
-	}
-	cout << "MEDIAN FILTER COMPLETE...\n\n";
-
-	ofstream outFile("GoldenStandard_EdgeImageData.txt");
-
-	outFile << rows << "\n";
-	outFile << cols << "\n";
-
-	for(int i = 0; i < items; i ++)
-	{
-  		outFile << out[i] << "\n";
-	}
-
-  	outFile.close();
-
-	return 0;
-
-
-}
-*/
 void getImageDimensions(string fname, int* dimensions)
 {
         fstream file;
@@ -219,7 +49,7 @@ int main(void)
                            { 0, 0, 0},
                            { 1, 2, 1} };
 
-	cout << "Golden standard edge detection...\n";
+	cout << "Golden standard median filter...\n";
 
         //Initilising variables
         bool displayMatrix = false;
@@ -300,7 +130,6 @@ int main(void)
 	for (int i = 0; i < items; i++){
                 Grey[i] = round(0.299*imageMatrixR[i]+0.587*imageMatrixG[i]+0.114*imageMatrixB[i]);
         }
-	cout << "Image data converted to greyscale...\n\n";
 	int sumx = 0, sumy = 0, angle = 0;
 	int p;
        	int k;
