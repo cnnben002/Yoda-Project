@@ -10,7 +10,6 @@ import numpy as np
 
 #Opening the txt file
 fname = input("Please type .txt file to be converted:\n")
-print(fname)
 f = open(fname, "r")
 
 #Getting file dimensions
@@ -46,5 +45,6 @@ image = Image.fromarray(data, 'RGB')
 print("Image conversion done...")
 
 #Saving the image
-image.save('processedYoda.png')
+fname = input("Please type name that you want to save .png image as:\n")
+image.save(fname)
 print("Image saved.")
