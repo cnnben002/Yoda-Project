@@ -56,7 +56,7 @@ int main(void)
         //Initilising variables
         bool displayMatrix = false;
         int dimensions[2];
-	string fname = "../imageData.txt";
+	string fname = "../medianImageData.txt";
 
 	//retrieving image dimensions
         getImageDimensions(fname, dimensions);
