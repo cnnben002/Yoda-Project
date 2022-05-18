@@ -8,7 +8,8 @@ from PIL import Image
 from numpy import asarray
 
 #Opening the image
-image = Image.open("yoda.jpg")
+fname = input("Please type image file to be converted:\n")
+image = Image.open(fname)
 
 #Getting image properties
 format = image.format
