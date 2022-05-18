@@ -43,13 +43,7 @@ int main(void)
 {
 	clock_t begin = clock();
 	
-	int sobx[3][3] = { {-1, 0, 1},
-                           {-2, 0, 2},
-                           {-1, 0, 1} };
 
-	int soby[3][3] = { {-1,-2,-1},
-                           { 0, 0, 0},
-                           { 1, 2, 1} };
 
 	cout << "Golden standard median filter...\n";
 
@@ -127,15 +121,11 @@ int main(void)
 
 	cout << "Image data read in...\n\n";
 	clock_t beginf = clock();
-	int Grey[items];
+	
 	int pos;
 
-	for (int i = 0; i < items; i++){
-                Grey[i] = round(0.299*imageMatrixR[i]+0.587*imageMatrixG[i]+0.114*imageMatrixB[i]);
-        }
-	int sumx = 0, sumy = 0, angle = 0;
-	int p;
-       	int k;
+	
+	
 	int out[items][3];
         
 	int w = cols;
@@ -146,19 +136,7 @@ int main(void)
         		pos = r*cols+c;
 			int i = pos;
 			if ((r != 0)&&(r != (rows-1))&&(c != 0)&&(c != (cols-1))){
-/*				sumx = 0;
-				sumy = 0;
-				p = -1;
-				for (int i = 0; i < 3; i++){
-					k = -1;
-					for (int j = 0; j < 3; j++){
-						sumx += sobx[i][j]*Grey[pos+p*cols+k];
-						sumx += soby[i][j]*Grey[pos+p*cols+k];
-						k = k+1;
-					}
-					p = p+1;
-				}
-*/				
+			
 				int pixel00, pixel01, pixel02, pixel10, pixel11, pixel12, pixel20, pixel21, pixel22;
 				pixel00 = imageMatrixR[pos - 1 - cols] ;
                                 pixel01 = imageMatrixR[pos - cols] ;
