@@ -7,7 +7,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-void getImageDimensions(string fname, int* dimensions)
+void getImageDimensions(string fname, int* dimensions) // reading in dimensions of preprocessed data
 {
         fstream file;
         file.open(fname,ios::in);
@@ -41,7 +41,7 @@ void getImageDimensions(string fname, int* dimensions)
 
 int main(void)
 {
-	clock_t begin = clock();
+	clock_t begin = clock(); //timer begin 
 	
 
 
@@ -50,14 +50,14 @@ int main(void)
         //Initilising variables
         bool displayMatrix = false;
         int dimensions[2];
-	string fname = "imageData.txt";
+	string fname = "imageData.txt"; //data file
 
-        getImageDimensions(fname, dimensions);
+        getImageDimensions(fname, dimensions); //image dimensions
 
-        int cols = dimensions[0];
+        int cols = dimensions[0]; 
         int rows = dimensions[1];
 	int items = rows*cols;
-	int imageMatrixR[items];
+	int imageMatrixR[items]; //colour layer individual arrays
 	int imageMatrixG[items];
 	int imageMatrixB[items];
 
@@ -67,7 +67,7 @@ int main(void)
 	fstream file;
         file.open(fname,ios::in);
 
-        if (file.is_open())
+        if (file.is_open())//taking data from image data text file
         {
                 int pos = -2;
                 string line;
@@ -120,24 +120,24 @@ int main(void)
         }
 
 	cout << "Image data read in...\n\n";
-	clock_t beginf = clock();
+	clock_t beginf = clock();// begining processing and  hence processing timer
 	
 	int pos;
 
 	
 	
-	int out[items][3];
+	int out[items][3]; //output array of length items and depth of the three colour layers 
         
 	int w = cols;
 	//row iteration
-	for (int r = 0; r < rows; r++){
+	for (int r = 0; r < rows; r++){ 
 		//col iteration
 		for (int c = 0; c < cols; c++){
         		pos = r*cols+c;
 			int i = pos;
-			if ((r != 0)&&(r != (rows-1))&&(c != 0)&&(c != (cols-1))){
-			
-				int pixel00, pixel01, pixel02, pixel10, pixel11, pixel12, pixel20, pixel21, pixel22;
+			if ((r != 0)&&(r != (rows-1))&&(c != 0)&&(c != (cols-1))){//accounting for edgecases
+			//create sub array of the elements surronding each red pixel
+				int pixel00, pixel01, pixel02, pixel10, pixel11, pixel12, pixel20, pixel21, pixel22; 
 				pixel00 = imageMatrixR[pos - 1 - cols] ;
                                 pixel01 = imageMatrixR[pos - cols] ;
                                 pixel02 = imageMatrixR[pos + 1 - cols] ;
@@ -148,7 +148,7 @@ int main(void)
                                 pixel21 = imageMatrixR[pos + cols] ;
                                 pixel22 = imageMatrixR[pos + 1 + cols] ;
                                 int filterVector[9] = {pixel00, pixel01, pixel02, pixel10, pixel11, pixel12, pixel20, pixel21, pixel22};
-                                for (int x = 0; x < 9; x++) {
+                                for (int x = 0; x < 9; x++) { //simple sorting function
                                     for(int j = x+ 1; j < 9; j++){
                                         if (filterVector[x] > filterVector[j]) {
                                             int tmp = filterVector[x];
@@ -157,6 +157,7 @@ int main(void)
                                         }
                                     }
                                 }
+				//create sub array of the elements surronding each green pixel
 				 int pixelG00, pixelG01, pixelG02, pixelG10, pixelG11, pixelG12, pixelG20, pixelG21, pixelG22;
                                  pixelG00 =  imageMatrixG[i - 1 - w] ;
                                  pixelG01 =  imageMatrixG[i - w] ;
@@ -168,7 +169,7 @@ int main(void)
                                  pixelG21 =  imageMatrixG[i + w] ;
                                  pixelG22 =  imageMatrixG[i + 1 + w] ;
                                  int filterVectorG[9] = {pixelG00, pixelG01, pixelG02, pixelG10, pixelG11, pixelG12, pixelG20, pixelG21, pixelG22};
-                                 for (int xG = 0; xG < 9; xG++) {
+                                 for (int xG = 0; xG < 9; xG++) { //simple sorting function
                                      for(int jG = xG+ 1; jG < 9; jG++){
                                          if (filterVectorG[xG] > filterVectorG[jG]) {
                                              int tmpG = filterVectorG[xG];
@@ -177,7 +178,7 @@ int main(void)
                                          }
                                      }
                                  }
-
+//create sub array of the elements surronding each bluepixel
                                  int pixelB00, pixelB01, pixelB02, pixelB10, pixelB11, pixelB12, pixelB20, pixelB21, pixelB22;
                                  pixelB00 =  imageMatrixB[i - 1 - w] ;
                                  pixelB01 =  imageMatrixB[i - w] ;
@@ -189,7 +190,7 @@ int main(void)
                                  pixelB21 =  imageMatrixB[i + w] ;
                                  pixelB22 =  imageMatrixB[i + 1 + w] ;
                                  int filterVectorB[9] = {pixelB00, pixelB01, pixelB02, pixelB10, pixelB11, pixelB12, pixelB20, pixelB21, pixelB22};
-                                 for (int xB = 0; xB < 9; xB++) {
+                                 for (int xB = 0; xB < 9; xB++) { //simple sorting function
                                      for(int jB = xB+ 1; jB < 9; jB++){
                                          if (filterVectorB[xB] > filterVectorB[jB]) {
                                              int tmpB = filterVectorB[xB];
@@ -199,25 +200,25 @@ int main(void)
                                      }
                                  }
 
-				out[pos][0] = (filterVector[4]);
+				out[pos][0] = (filterVector[4]);//median pixel at position 4
 				out[pos][1] = (filterVectorG[4]);
 				out[pos][2] = (filterVectorB[4]);
 			}else{
-				out[pos][0] = imageMatrixR[pos];
+				out[pos][0] = imageMatrixR[pos];//add edge cases to output
 				out[pos][1] = imageMatrixG[pos];
 				out[pos][2] = imageMatrixB[pos];
 			}
 		}
 	}
-	clock_t endf = clock();
+	clock_t endf = clock();//end timer 
 	cout << "edge detection complete...\n\n";
 
-	ofstream outFile("gsMedianImageData.txt");
+	ofstream outFile("gsMedianImageData.txt"); //output file
 
 	outFile << rows << "\n";
 	outFile << cols << "\n";
 
-	for(int i = 0; i < items; i ++)
+	for(int i = 0; i < items; i ++) //loop through array and output
 	{
   		outFile << out[i][0] << " " << out[i][1] << " " << out[i][2] <<"\n";
 	}
