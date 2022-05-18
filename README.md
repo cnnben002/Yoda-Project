@@ -19,3 +19,6 @@ Edge detector filtering is done using the edgeDetector.cpp file in the edgeDetec
 
 ## Postprocessing 
 Postprocessing is done using the postprocessing.py file and is run in python. This takes an image in .txt format and converts it into a .png image. The program allows you to select your input file and name your output file by typing it into the terminal.
+
+## Postprocessing Batch
+There is also a postprocessingbatch.py file which can be run in python. It does the exact same thing as the postprocessing.py file, but does all image conversions from both the edge and median filtering files, including the golden measures, and also doesnt allow you to pick names.  
