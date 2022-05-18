@@ -50,7 +50,7 @@ int main(void)
         //Initilising variables
         bool displayMatrix = false;
         int dimensions[2];
-	string fname = "imageData.txt"; //data file
+	string fname = "../imageData.txt"; //data file
 
         getImageDimensions(fname, dimensions); //image dimensions
 
@@ -213,7 +213,7 @@ int main(void)
 	clock_t endf = clock();//end timer 
 	cout << "edge detection complete...\n\n";
 
-	ofstream outFile("gsMedianImageData.txt"); //output file
+	ofstream outFile("../gsMedianImageData.txt"); //output file
 
 	outFile << rows << "\n";
 	outFile << cols << "\n";
