@@ -10,6 +10,7 @@
 #include<fstream>
 #include<string>
 #include<cmath>
+#include<time.h>
 #include <tuple>
 using namespace std;
 
@@ -48,6 +49,8 @@ void getImageDimensions(string fname, int* dimensions)
 
 int main(void)
 {
+	clock_t begin = clock();
+
 	cout << "Median filter processing started...\n";
 
         //Initilising variables
@@ -129,7 +132,7 @@ int main(void)
 	cout << "Dimensions of matrix: " << cols << "x" << rows << "\n\n";
 
 	//Initializing buffers
-	cl_mem imageMatrixR_buffer, imageMatrixG_buffer, imageMatrixB_buffer, outputMatrix_buffer;
+	cl_mem imageMatrixR_buffer, imageMatrixG_buffer, imageMatrixB_buffer, outputMatrixR_buffer, outputMatrixG_buffer, outputMatrixB_buffer;
 	cout << "Buffers initialised...\n\n";
 
     	//------------------------------------------------------------------------
@@ -169,7 +172,6 @@ int main(void)
 	}
 
 	printf("Device ID = %i\n\n",err);
-
 	cout << "Stage 2 complete...\n";
 
 	//------------------------------------------------------------------------
@@ -232,13 +234,17 @@ int main(void)
 	cl_int num_groups = global_size/local_size; 	//Number of work groups needed
 
 	//Initialising output matrix
-        char outputMatrix[global_size];
+        int outputMatrixR[global_size];
+        int outputMatrixG[global_size];
+        int outputMatrixB[global_size];
 
 	//Creating buffers
 	imageMatrixR_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixR, &err);
         imageMatrixG_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixG, &err);
         imageMatrixB_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), &imageMatrixB, &err);
-	outputMatrix_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(char), outputMatrix, &err);
+	outputMatrixR_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), outputMatrixR, &err);
+        outputMatrixG_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), outputMatrixG, &err);
+        outputMatrixB_buffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, global_size*sizeof(int), outputMatrixB, &err);
 
         cout << "Stage 9 complete...\n";
 
@@ -247,7 +253,9 @@ int main(void)
 	clSetKernelArg(kernel, 0, sizeof(cl_mem), &imageMatrixR_buffer);
 	clSetKernelArg(kernel, 1, sizeof(cl_mem), &imageMatrixG_buffer);
 	clSetKernelArg(kernel, 2, sizeof(cl_mem), &imageMatrixB_buffer);
-	clSetKernelArg(kernel, 3, sizeof(cl_mem), &outputMatrix_buffer);
+        clSetKernelArg(kernel, 3, sizeof(cl_mem), &outputMatrixR_buffer);
+        clSetKernelArg(kernel, 4, sizeof(cl_mem), &outputMatrixG_buffer);
+        clSetKernelArg(kernel, 5, sizeof(cl_mem), &outputMatrixB_buffer);
 
         cout << "Stage 10 complete...\n";
 
@@ -261,7 +269,9 @@ int main(void)
 
 	//------------------------------------------------------------------------
 	//Allowing the host to read from the buffer object
-	err = clEnqueueReadBuffer(queue, outputMatrix_buffer, CL_TRUE, 0, sizeof(outputMatrix), outputMatrix, 0, NULL, NULL);
+	err = clEnqueueReadBuffer(queue, outputMatrixR_buffer, CL_TRUE, 0, sizeof(outputMatrixR), outputMatrixR, 0, NULL, NULL);
+        err = clEnqueueReadBuffer(queue, outputMatrixG_buffer, CL_TRUE, 0, sizeof(outputMatrixG), outputMatrixG, 0, NULL, NULL);
+        err = clEnqueueReadBuffer(queue, outputMatrixB_buffer, CL_TRUE, 0, sizeof(outputMatrixB), outputMatrixB, 0, NULL, NULL);
 
 	//Stopping the program here until everything in the queue has been run
 	clFinish(queue);
@@ -282,7 +292,9 @@ int main(void)
 	//------------------------------------------------------------------------
 	//Deallocating resources
 	clReleaseKernel(kernel);
-	clReleaseMemObject(outputMatrix_buffer);
+	clReleaseMemObject(outputMatrixR_buffer);
+        clReleaseMemObject(outputMatrixG_buffer);
+        clReleaseMemObject(outputMatrixB_buffer);
 	clReleaseMemObject(imageMatrixR_buffer);
 	clReleaseMemObject(imageMatrixG_buffer);
 	clReleaseMemObject(imageMatrixB_buffer);
@@ -294,19 +306,28 @@ int main(void)
 
 	//------------------------------------------------------------------------
         //Writing the output array to a text file for post median filter processing
-	ofstream outFile("../edgeImageData.txt");
+	ofstream outFile("../medianImageData.txt");
 
 	outFile << rows << "\n";
 	outFile << cols << "\n";
 
 	for(int i = 0; i < items; i ++)
 	{
-  		outFile << outputMatrix[i] << "\n";
+  		outFile << outputMatrixR[i] << " ";
+		outFile << outputMatrixG[i] << " ";
+                outFile << outputMatrixB[i] << "\n";
 	}
 
   	outFile.close();
 
-	cout << "Stage 15 complete...\n";
+	cout << "Stage 15 complete...\n\n";
+
+	//------------------------------------------------------------------------
+        //Calculating program run time and ending the program
+	clock_t end = clock();
+	double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
+
+	cout << "Runtime: " << runtime << " ms\n";
 
 	return 0;
 }

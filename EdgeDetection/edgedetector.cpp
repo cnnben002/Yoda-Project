@@ -48,6 +48,8 @@ void getImageDimensions(string fname, int* dimensions)
 
 int main(void)
 {
+	clock_t begin = clock();
+
 	cout << "Median filter processing started...\n";
 
         //Initilising variables
@@ -306,7 +308,14 @@ int main(void)
 
   	outFile.close();
 
-	cout << "Stage 15 complete...\n";
+	cout << "Stage 15 complete...\n\n";
 
-	return 0;
+        //------------------------------------------------------------------------
+        //Calculating program run time and ending the program
+        clock_t end = clock();
+        double runtime = (double)(end-begin)*1000/CLOCKS_PER_SEC;
+
+        cout << "Runtime: " << runtime << " ms\n";
+
+        return 0;
 }
