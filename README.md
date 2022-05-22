@@ -22,3 +22,6 @@ Postprocessing is done using the postprocessing.py file and is run in python. Th
 
 ## Postprocessing Batch
 There is also a postprocessingbatch.py file which can be run in python. It does the exact same thing as the postprocessing.py file, but does all image conversions from both the edge and median filtering files, including the golden measures, and also doesnt allow you to pick names.  
+
+## Accuracy Test
+There is also an accuracy.py file which can be run in python. It allows for the user to select two .txt files (which represents two images) and prints the accuracy of the comparison file to the refernce file. This was only used when coming up with an analysis for the report.  
